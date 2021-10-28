@@ -133,4 +133,41 @@ public class MonoTest {
 
         log.info("Init verifier");
     }
+
+    @Test
+    public void monoDoOnError() {
+        String name = "Jordan Negreiros";
+
+        Mono<Object> error = Mono.error(new IllegalAccessException("Illegal argument exception"))
+            .doOnError(e -> log.error("Error message: {}", e.getMessage()))
+            .onErrorResume(s -> {
+                log.info("Inside On erro Resume");
+                return Mono.just(name);
+            })
+            .log();
+
+        log.info("Init verifier");
+        StepVerifier.create(error)
+            .expectNext(name)
+            .verifyComplete();
+    }
+
+    @Test
+    public void monoDoOnErrorReturn() {
+        String name = "Jordan Negreiros";
+
+        Mono<Object> error = Mono.error(new IllegalAccessException("Illegal argument exception"))
+            .doOnError(e -> log.error("Error message: {}", e.getMessage()))
+            .onErrorReturn("Inside On erro Return")
+            .onErrorResume(s -> {
+                log.info("Inside On erro Resume");
+                return Mono.just(name);
+            })
+            .log();
+
+        log.info("Init verifier");
+        StepVerifier.create(error)
+            .expectNext("Inside On erro Return")
+            .verifyComplete();
+    }
 }
